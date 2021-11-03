@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'order_model.dart';
+import 'package:dartz/dartz.dart';
 
 class GetDataFileAsList {
   Future<List> call() async {
@@ -18,14 +19,18 @@ class GetDataFileAsList {
 }
 
 class OrdersReport {
-  getNumOfReturns(List<OrderModel> orders) {
+  Either<Exception, int> getNumOfReturns(List<OrderModel> orders) {
     int numOfReturns = 0;
-    for (var element in orders) {
-      if (element.status == "RETURNED") {
-        numOfReturns++;
+    try {
+      for (var element in orders) {
+        if (element.status == "RETURNED") {
+          numOfReturns++;
+        }
       }
+      return Right(numOfReturns);
+    } catch (e) {
+      rethrow;
     }
-    return numOfReturns;
   }
 
   getAveragePrice(List<OrderModel> orders) {

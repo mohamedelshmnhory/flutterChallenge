@@ -3,7 +3,6 @@ import 'package:untitled2/screens/layout_template/layout_template.dart';
 import 'locator.dart';
 import 'routing/route_names.dart';
 import 'routing/router.dart';
-import 'screens/home_screen.dart';
 import 'services/navigation_service.dart';
 
 void main() {

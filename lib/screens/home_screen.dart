@@ -7,7 +7,6 @@ import 'package:untitled2/models/order_model.dart';
 import 'package:untitled2/routing/route_names.dart';
 import 'package:untitled2/widgets/app_bar.dart';
 import 'package:untitled2/widgets/screen_info.dart';
-import 'chart_screen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -28,7 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
   fetchData() async {
     List dataFile = await data();
     orders = data.getOrderList(dataFile);
-    numOfReturns = ordersReport.getNumOfReturns(orders);
+    numOfReturns = ordersReport.getNumOfReturns(orders).getOrElse(() => 0);
     averagePrice = ordersReport.getAveragePrice(orders);
     ordersBerMonth = ordersReport.getMapOrdersBerMonth(orders);
     setState(() {});

@@ -27,10 +27,10 @@ main() {
     test('should return int', () async {
       List data = await dataFile();
       List<OrderModel> orders = dataFile.getOrderList(data);
+      OrdersReport ordersReport = OrdersReport();
+      var numOfReturns = ordersReport.getNumOfReturns(orders);
 
-      int numOfReturns = OrdersReport().getNumOfReturns(orders);
-
-      expect(numOfReturns is int, true);
+      expect(numOfReturns.isRight(), true);
     });
   });
 }
