@@ -1,16 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:untitled2/models/order_model.dart';
-
-import 'models/device_info.dart';
+import 'package:untitled2/screens/layout_template/layout_template.dart';
+import 'locator.dart';
+import 'routing/route_names.dart';
+import 'routing/router.dart';
 import 'screens/home_screen.dart';
-import 'widgets/screen_info.dart';
+import 'services/navigation_service.dart';
 
 void main() {
+  setupLocator();
   runApp(const MyApp());
 }
 
@@ -24,11 +21,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Reports'),
+      builder: (context, child) => LayoutTemplate(child: child!),
+      navigatorKey: locator<NavigationService>().navigatorKey,
+      onGenerateRoute: generateRoute,
+      initialRoute: HomeRoute,
     );
   }
 }
-
-
-
-

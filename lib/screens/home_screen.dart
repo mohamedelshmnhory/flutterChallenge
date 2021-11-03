@@ -1,13 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
+import 'package:untitled2/models/data.dart';
 import 'package:untitled2/models/device_info.dart';
 import 'package:untitled2/models/order_model.dart';
+import 'package:untitled2/routing/route_names.dart';
+import 'package:untitled2/widgets/app_bar.dart';
 import 'package:untitled2/widgets/screen_info.dart';
-
 import 'chart_screen.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -19,106 +18,74 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  GetDataFileAsList data = GetDataFileAsList();
+  OrdersReport ordersReport = OrdersReport();
   List<OrderModel> orders = [];
   int numOfReturns = 0;
   double averagePrice = 0;
-  List<int> months = [];
-  Map<int, int> count = {};
+  Map<int, int> ordersBerMonth = {};
 
-  Future<String> getDataFile() async {
-    return await rootBundle.loadString('assets/data/orders.json');
-  }
-
-  getData() async {
-    String text = await getDataFile();
-    List data = json.decode(text);
-    orders = data.map((e) => OrderModel.fromJson(e)).toList();
-    getNumOfReturns();
-    getAveragePrice();
-    getMonths();
+  fetchData() async {
+    List dataFile = await data();
+    orders = data.getOrderList(dataFile);
+    numOfReturns = ordersReport.getNumOfReturns(orders);
+    averagePrice = ordersReport.getAveragePrice(orders);
+    ordersBerMonth = ordersReport.getMapOrdersBerMonth(orders);
     setState(() {});
-  }
-
-  getNumOfReturns() {
-    for (var element in orders) {
-      if (element.status == "RETURNED") {
-        numOfReturns++;
-      }
-    }
-  }
-
-  getAveragePrice() {
-    double total = 0;
-    for (var element in orders) {
-      double price =
-          double.parse(element.price!.substring(1).replaceFirst(",", ""));
-      total = total + price;
-    }
-    averagePrice = total / orders.length;
-  }
-
-  getMonths() {
-    for (var element in orders) {
-      months.add(DateTime.parse(element.registered!).month);
-    }
-    months.sort();
-    for (var i in months) {
-      count[i] = (count[i] ?? 0) + 1;
-    }
   }
 
   @override
   initState() {
     super.initState();
-    getData();
+    fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
     return InfoWidget(builder: (BuildContext context, DeviceInfo deviceInfo) {
       bool isMobile = deviceInfo.deviceType == TheDeviceType.Mobile;
-      return Scaffold(
-        appBar: isMobile
-            ? AppBar(title: Text(widget.title), centerTitle: true)
-            : null,
-        body: Center(
-          child: Row(
-            children: [
-              if (!isMobile) const Expanded(child: SizedBox()),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Details(
-                          orders: orders,
-                          averagePrice: averagePrice,
-                          numOfReturns: numOfReturns),
-                      const SizedBox(height: 30),
-                      MaterialButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => Chart(count: count)));
-                        },
-                        child: const Text('Chart',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                        color: Colors.blue,
+      return Column(
+        children: [
+          if (isMobile) const CustomAppBar(title: 'Report'),
+          Expanded(
+            child: Center(
+              child: Row(
+                children: [
+                  if (!isMobile) const Expanded(child: SizedBox()),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Details(
+                              orders: orders,
+                              averagePrice: averagePrice,
+                              numOfReturns: numOfReturns),
+                          const SizedBox(height: 30),
+                          MaterialButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, ChartRoute,
+                                  arguments: ordersBerMonth);
+                            },
+                            child: const Text('Chart',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                            color: Colors.blue,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  if (!isMobile) const Expanded(child: SizedBox()),
+                ],
               ),
-              if (!isMobile) const Expanded(child: SizedBox()),
-            ],
+            ),
           ),
-        ), // This trailing comma makes auto-formatting nicer for build methods.
-      );
+        ],
+      ); // This trailing comma makes auto-formatting nicer for build methods.
     });
   }
 }
